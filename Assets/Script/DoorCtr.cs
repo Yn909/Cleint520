@@ -35,7 +35,7 @@ public class DoorCtr : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            Debug.Log("AAA");
+           // Debug.Log("AAA");
             isOpen = true;
         }
     }

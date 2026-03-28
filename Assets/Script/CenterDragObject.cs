@@ -42,6 +42,8 @@ public class CenterDragObject : MonoBehaviour
     private int originalLayer;                     // 原始层
     private Transform holdPoint;                   // 镜头前的目标抓取点
 
+
+
     // 物体根节点到“视觉中心”的偏移
     // 后面移动的是根节点，但我们希望对准的是视觉中心
     private Vector3 centerOffsetWorld;

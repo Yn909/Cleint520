@@ -13,6 +13,19 @@ public class SimpleDayNightRotation : MonoBehaviour
     public float fixedYRotation = -381.25f;  // 固定Y（你现在用的）
     public float fixedZRotation = 0f;         // 固定Z
 
+    int hour;
+    int minute;
+    float temperature = 25f;
+    float targetTemp;
+    float changeInterval = 5f; // 每5秒换一次目标
+    float timer = 0f;
+    public HomeStatusManager statusManager;
+
+    private void Awake()
+    {
+        SetNewTarget();
+        statusManager = GetComponent<HomeStatusManager>();
+    }
     void Update()
     {
         if (directionalLight == null) return;
@@ -22,7 +35,23 @@ public class SimpleDayNightRotation : MonoBehaviour
         {
             float fullDaySeconds = dayDurationInMinutes * 60f;
             currentTime += (24f / fullDaySeconds) * Time.deltaTime;
+            hour = Mathf.FloorToInt(currentTime);
+            minute= Mathf.FloorToInt((currentTime - hour) * 60f);
+            statusManager.hour = hour;
+            statusManager.minute = minute;
+            //  平滑过渡（控制变化速度）
+            temperature = Mathf.MoveTowards(temperature, targetTemp, Time.deltaTime );
 
+            // 计时
+            timer += Time.deltaTime;
+
+            if (timer >= changeInterval)
+            {
+                SetNewTarget();
+                timer = 0f;
+            }
+            statusManager.currentTemperature = temperature;//温度的变化
+            statusManager.SendHomeStatus();
             if (currentTime >= 24f)
                 currentTime -= 24f;
         }
@@ -33,7 +62,10 @@ public class SimpleDayNightRotation : MonoBehaviour
         directionalLight.transform.rotation =
             Quaternion.Euler(xAngle, fixedYRotation, fixedZRotation);
     }
-
+    void SetNewTarget()
+    {
+        targetTemp = Random.Range(20f, 25f);
+    }
     float GetSunXAngleByTime(float time)
     {
         // 时间 → 角度映射

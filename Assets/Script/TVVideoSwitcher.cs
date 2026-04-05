@@ -1,63 +1,78 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.Video;
 
 [RequireComponent(typeof(Collider))]
+[RequireComponent(typeof(VideoPlayer))]
 public class TVVideoSwitcher : MonoBehaviour
 {
-    [Header("ÒıÓÃ")]
-    public Camera playerCamera;                 // Íæ¼ÒÉãÏñ»ú
-    public VideoPlayer videoPlayer;             // ÊÓÆµ²¥·ÅÆ÷
-    public MeshRenderer screenRenderer;         // µçÊÓÆÁÄ»µÄ MeshRenderer
+    [Header("å¼•ç”¨")]
+    public Camera playerCamera;
+    public VideoPlayer videoPlayer;
+    public MeshRenderer screenRenderer;
 
-    [Header("²ÄÖÊ")]
-    public Material offMaterial;                // ¹Ø±ÕÊ±ºÚÆÁ²ÄÖÊ
-    public Material playingMaterial;            // ²¥·ÅÊ±²ÄÖÊ£¨¹ÒÁË RenderTexture µÄ²ÄÖÊ£©
+    [Header("è§†é¢‘åˆ—è¡¨")]
+    public VideoClip[] videoClips;
 
-    [Header("ÊÓÆµÁĞ±í")]
-    public VideoClip[] videoClips;              // ÄãµÄ3¸öÊÓÆµ
+    [Header("äº¤äº’å‚æ•°")]
+    public float interactDistance = 5f;
+    public LayerMask interactLayer;
 
-    [Header("½»»¥²ÎÊı")]
-    public float interactDistance = 5f;         // ¿É½»»¥¾àÀë
-    public LayerMask interactLayer;             // µçÊÓËùÔÚ²ã
-
-    [Header("°´¼üÉèÖÃ")]
-    public KeyCode playOrStopKey = KeyCode.T;   // ²¥·Å / ÔİÍ££¨¹Ø±Õ£©
-    public KeyCode nextVideoKey = KeyCode.N;    // ÏÂÒ»¸öÊÓÆµ
+    [Header("æŒ‰é”®è®¾ç½®")]
+    public KeyCode playOrStopKey = KeyCode.T;
+    public KeyCode nextVideoKey = KeyCode.N;
 
     private int currentVideoIndex = 0;
     private bool isPlaying = false;
     private bool isPreparing = false;
-    Ray ray; 
+
+    private RenderTexture renderTexture; // â­ æ¯ä¸ªTVç‹¬ç«‹RT
+    private Ray ray;
+
+    public TVDevice vDevice;
 
     void Start()
     {
+        vDevice = GetComponent<TVDevice>();
+        // è·å–ç»„ä»¶
         if (videoPlayer == null)
-        {
             videoPlayer = GetComponent<VideoPlayer>();
-        }
 
         if (playerCamera == null)
-        {
             playerCamera = Camera.main;
+
+        //  æè´¨å®ä¾‹åŒ–ï¼ˆé¿å…å…±ç”¨æè´¨ï¼‰
+        if (screenRenderer != null)
+        {
+            screenRenderer.material = new Material(screenRenderer.material);
         }
 
-        // ³õÊ¼ºÚÆÁ
+        //  åˆ›å»ºç‹¬ç«‹ RenderTexture
+        renderTexture = new RenderTexture(1920, 1080, 0);
+        renderTexture.Create();
+
+        // ç»‘å®š VideoPlayer
+        videoPlayer.targetTexture = renderTexture;
+
+        // ç»‘å®šæè´¨è´´å›¾
+        if (screenRenderer != null)
+        {
+            screenRenderer.material.mainTexture = renderTexture;
+        }
+
+        // åˆå§‹é»‘å±
         ShowOffScreen();
 
-        if (videoPlayer != null)
-        {
-            videoPlayer.playOnAwake = false;
-            videoPlayer.Stop();
+        // VideoPlayer è®¾ç½®
+        videoPlayer.playOnAwake = false;
+        videoPlayer.Stop();
 
-            videoPlayer.prepareCompleted += OnPrepareCompleted;
-            videoPlayer.errorReceived += OnVideoError;
-            videoPlayer.loopPointReached += OnVideoFinished;
-        }
+        videoPlayer.prepareCompleted += OnPrepareCompleted;
+        videoPlayer.errorReceived += OnVideoError;
+        videoPlayer.loopPointReached += OnVideoFinished;
     }
 
     void Update()
     {
-        // F£º²¥·Å / ¹Ø±Õ
         if (Input.GetKeyDown(playOrStopKey))
         {
             if (CanInteractWithTV())
@@ -66,7 +81,6 @@ public class TVVideoSwitcher : MonoBehaviour
             }
         }
 
-        // R£ºÏÂÒ»¸öÊÓÆµ
         if (Input.GetKeyDown(nextVideoKey))
         {
             if (CanInteractWithTV())
@@ -76,13 +90,8 @@ public class TVVideoSwitcher : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// ÊÇ·ñÔÊĞíºÍµçÊÓ½»»¥
-    /// ±ØĞëÆÁÄ»ÖĞĞÄ×¼ĞÇ¶Ô×¼µçÊÓ£¬²¢ÇÒÔÚ½»»¥¾àÀëÄÚ
-    /// </summary>
     bool CanInteractWithTV()
     {
-        Debug.Log("aaa,,,,");
         if (playerCamera == null)
             return false;
 
@@ -91,10 +100,8 @@ public class TVVideoSwitcher : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit, interactDistance, interactLayer, QueryTriggerInteraction.Ignore))
         {
-            // ÃüÖĞ×Ô¼º»ò×Ô¼ºµÄ×ÓÎïÌå
             if (hit.transform == transform || hit.transform.IsChildOf(transform))
             {
-                
                 return true;
             }
         }
@@ -102,47 +109,36 @@ public class TVVideoSwitcher : MonoBehaviour
         return false;
     }
 
-    /// <summary>
-    /// F ¼üÂß¼­£º²¥·Å / ¹Ø±Õ
-    /// </summary>
     public void TogglePlayOrStop()
     {
         if (videoClips == null || videoClips.Length == 0)
         {
-            Debug.LogWarning("Ã»ÓĞÉèÖÃÊÓÆµÁĞ±í");
-            return;
-        }
-
-        if (videoPlayer == null)
-        {
-            Debug.LogWarning("Ã»ÓĞÉèÖÃ VideoPlayer");
+            Debug.LogWarning("æ²¡æœ‰è®¾ç½®è§†é¢‘åˆ—è¡¨");
             return;
         }
 
         if (isPlaying || isPreparing)
         {
             StopVideo();
+            vDevice.isOn = false;
         }
         else
         {
+            vDevice.isOn = true;
             PlayCurrentVideo();
         }
+        WebSocketManager.Instance.SendDeviceUpdate(vDevice);
     }
 
-    /// <summary>
-    /// ²¥·Åµ±Ç°ÊÓÆµ
-    /// </summary>
     public void PlayCurrentVideo()
     {
         if (videoClips == null || videoClips.Length == 0) return;
-        if (videoPlayer == null) return;
 
         currentVideoIndex = Mathf.Clamp(currentVideoIndex, 0, videoClips.Length - 1);
 
         videoPlayer.Stop();
         videoPlayer.clip = videoClips[currentVideoIndex];
 
-        // ÇĞµ½²¥·Å²ÄÖÊ
         ShowPlayingScreen();
 
         isPreparing = true;
@@ -151,15 +147,25 @@ public class TVVideoSwitcher : MonoBehaviour
         videoPlayer.Prepare();
     }
 
-    /// <summary>
-    /// R ¼üÂß¼­£ºÇĞ»»ÏÂÒ»¸öÊÓÆµ²¢²¥·Å
-    /// </summary>
     public void PlayNextVideo()
     {
         if (videoClips == null || videoClips.Length == 0) return;
-        if (videoPlayer == null) return;
 
         currentVideoIndex++;
+        if (currentVideoIndex >= videoClips.Length)
+        {
+            currentVideoIndex = 0;
+        }
+        vDevice.channel = currentVideoIndex+1;
+        WebSocketManager.Instance.SendDeviceUpdate(vDevice);
+        PlayCurrentVideo();
+    }
+
+    public void PlayNextVideo(int index)
+    {
+        if (videoClips == null || videoClips.Length == 0) return;
+
+        currentVideoIndex = index - 1;
         if (currentVideoIndex >= videoClips.Length)
         {
             currentVideoIndex = 0;
@@ -168,15 +174,9 @@ public class TVVideoSwitcher : MonoBehaviour
         PlayCurrentVideo();
     }
 
-    /// <summary>
-    /// Í£Ö¹²¥·Å²¢ºÚÆÁ
-    /// </summary>
     public void StopVideo()
     {
-        if (videoPlayer != null)
-        {
-            videoPlayer.Stop();
-        }
+        videoPlayer.Stop();
 
         isPlaying = false;
         isPreparing = false;
@@ -184,9 +184,6 @@ public class TVVideoSwitcher : MonoBehaviour
         ShowOffScreen();
     }
 
-    /// <summary>
-    /// ÊÓÆµ×¼±¸Íê³Éºó×Ô¶¯²¥·Å
-    /// </summary>
     void OnPrepareCompleted(VideoPlayer source)
     {
         isPreparing = false;
@@ -194,9 +191,6 @@ public class TVVideoSwitcher : MonoBehaviour
         source.Play();
     }
 
-    /// <summary>
-    /// ÊÓÆµ²¥·Å½áÊøºó»Ö¸´ºÚÆÁ
-    /// </summary>
     void OnVideoFinished(VideoPlayer source)
     {
         isPlaying = false;
@@ -204,36 +198,40 @@ public class TVVideoSwitcher : MonoBehaviour
         ShowOffScreen();
     }
 
-    /// <summary>
-    /// ÊÓÆµ²¥·Å³ö´í
-    /// </summary>
     void OnVideoError(VideoPlayer source, string message)
     {
-        Debug.LogError("ÊÓÆµ²¥·Å´íÎó: " + message);
+        Debug.LogError("è§†é¢‘æ’­æ”¾é”™è¯¯: " + message);
         isPlaying = false;
         isPreparing = false;
         ShowOffScreen();
     }
 
-    /// <summary>
-    /// ÏÔÊ¾ºÚÆÁ²ÄÖÊ
-    /// </summary>
+    //  ä¸å†åˆ‡æ¢æè´¨ï¼Œåªæ”¹è´´å›¾
     void ShowOffScreen()
     {
-        if (screenRenderer != null && offMaterial != null)
+        if (screenRenderer != null)
         {
-            screenRenderer.material = offMaterial;
+            screenRenderer.material.mainTexture = null;
+            screenRenderer.material.color = Color.black;
         }
     }
 
-    /// <summary>
-    /// ÏÔÊ¾²¥·Å²ÄÖÊ
-    /// </summary>
     void ShowPlayingScreen()
     {
-        if (screenRenderer != null && playingMaterial != null)
+        if (screenRenderer != null)
         {
-            screenRenderer.material = playingMaterial;
+            screenRenderer.material.mainTexture = renderTexture;
+            screenRenderer.material.color = Color.white;
+        }
+    }
+
+    //  é˜²æ­¢å†…å­˜æ³„æ¼ï¼ˆéå¸¸é‡è¦ï¼‰
+    void OnDestroy()
+    {
+        if (renderTexture != null)
+        {
+            renderTexture.Release();
+            Destroy(renderTexture);
         }
     }
 }

@@ -9,7 +9,7 @@ public class Player : MonoBehaviour
 
     private CharacterController controller;
     private Vector3 velocity;
-
+    bool isCursorVisible = false;
     void Start()
     {
         controller = GetComponent<CharacterController>();
@@ -26,5 +26,20 @@ public class Player : MonoBehaviour
 
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            isCursorVisible = !isCursorVisible;
+
+            if (isCursorVisible)
+            {
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
+            }
+            else
+            {
+                Cursor.visible = false;
+                Cursor.lockState = CursorLockMode.Locked;
+            }
+        }
     }
 }

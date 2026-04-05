@@ -6,6 +6,7 @@ public class LightToggleSimple : MonoBehaviour
     public float interactDistance = 5f;
     // 灯所属的父物体
     public GameObject[] lights;
+    public LampDevice lampDevice;
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.T))
@@ -13,13 +14,18 @@ public class LightToggleSimple : MonoBehaviour
             ToggleLight();
         }
     }
-
+    private void Awake()
+    {
+        lampDevice = GetComponent<LampDevice>();
+        ignoreLayer = LayerMask.GetMask("IgnoreRaycast");
+    }
+    int ignoreLayer;
     void ToggleLight()
     {
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit;
 
-        if (Physics.Raycast(ray, out hit, interactDistance))
+        if (Physics.Raycast(ray, out hit, interactDistance, ~ignoreLayer))
         {
            
             if (hit.collider.CompareTag("Light"))
@@ -32,8 +38,12 @@ public class LightToggleSimple : MonoBehaviour
                 foreach (var l in lights)
                 {
                     l.SetActive(newState);
+
                 }
-            
+                lampDevice.isOn = newState;
+                WebSocketManager.Instance.SendDeviceUpdate(lampDevice);
+
+
             }
         }
     }

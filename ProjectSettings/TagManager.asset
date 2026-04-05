@@ -5,11 +5,12 @@ TagManager:
   serializedVersion: 2
   tags:
   - Light
+  - Check
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - IgnoreRaycast
   - Water
   - UI
   - Move

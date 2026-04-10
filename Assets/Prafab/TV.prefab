@@ -13,6 +13,9 @@ GameObject:
   - component: {fileID: 1326430569860770954}
   - component: {fileID: 408130137123958784}
   - component: {fileID: 677952149697236316}
+  - component: {fileID: 2849962522748690571}
+  - component: {fileID: 8803794816462414642}
+  - component: {fileID: 8803794816462414643}
   m_Layer: 6
   m_Name: TV
   m_TagString: Untagged
@@ -113,8 +116,6 @@ MonoBehaviour:
   playerCamera: {fileID: 0}
   videoPlayer: {fileID: 8306270894350923940}
   screenRenderer: {fileID: 8306270894350923938}
-  offMaterial: {fileID: 2100000, guid: 3478d241417d78d4e9333b87118a712f, type: 2}
-  playingMaterial: {fileID: 2100000, guid: 14aefd34ef657bb47ab42b12c6b2adf6, type: 2}
   videoClips:
   - {fileID: 32900000, guid: 5d801a9fe4cd1f34b950837534f9ffbf, type: 3}
   - {fileID: 32900000, guid: 9f43958a7e2aee8478b4792a63a28cab, type: 3}
@@ -125,6 +126,75 @@ MonoBehaviour:
     m_Bits: 64
   playOrStopKey: 102
   nextVideoKey: 114
+  vDevice: {fileID: 0}
+--- !u!328 &2849962522748690571
+VideoPlayer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 677952149697236319}
+  m_Enabled: 1
+  m_VideoClip: {fileID: 0}
+  m_TargetCameraAlpha: 1
+  m_TargetCamera3DLayout: 0
+  m_TargetCamera: {fileID: 0}
+  m_TargetTexture: {fileID: 0}
+  m_TimeReference: 0
+  m_TargetMaterialRenderer: {fileID: 0}
+  m_TargetMaterialProperty: _MainTex
+  m_RenderMode: 3
+  m_AspectRatio: 2
+  m_DataSource: 0
+  m_PlaybackSpeed: 1
+  m_AudioOutputMode: 2
+  m_TargetAudioSources:
+  - {fileID: 0}
+  m_DirectAudioVolumes:
+  - 1
+  m_Url: 
+  m_EnabledAudioTracks: 01
+  m_DirectAudioMutes: 00
+  m_ControlledAudioTrackCount: 1
+  m_PlayOnAwake: 1
+  m_SkipOnDrop: 1
+  m_Looping: 0
+  m_WaitForFirstFrame: 1
+  m_FrameReadyEventEnabled: 0
+  m_VideoShaders: []
+--- !u!114 &8803794816462414642
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 677952149697236319}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 179fa53651eb65849ba7f6b644d0fb7b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  roomName: 
+--- !u!114 &8803794816462414643
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 677952149697236319}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96364b9937b34dc4bb6d8ab3d4d84b8f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  deviceId: 0
+  deviceName: "\u7535\u89C6"
+  deviceType: tv
+  roomName: "\u672A\u5206\u7EC4"
+  isOn: 0
+  channel: 1
+  volume: 30
+  TV: {fileID: 677952149697236316}
 --- !u!1 &8306270894350923942
 GameObject:
   m_ObjectHideFlags: 0
@@ -231,12 +301,12 @@ VideoPlayer:
   m_TargetAudioSources:
   - {fileID: 0}
   m_DirectAudioVolumes:
-  - 1
+  - 0.3
   m_Url: 
   m_EnabledAudioTracks: 01
   m_DirectAudioMutes: 00
   m_ControlledAudioTrackCount: 1
-  m_PlayOnAwake: 0
+  m_PlayOnAwake: 1
   m_SkipOnDrop: 1
   m_Looping: 0
   m_WaitForFirstFrame: 1

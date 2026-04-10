@@ -32,6 +32,7 @@ public class TVVideoSwitcher : MonoBehaviour
 
     void Start()
     {
+        playerCamera = Camera.main;
         vDevice = GetComponent<TVDevice>();
         // 获取组件
         if (videoPlayer == null)

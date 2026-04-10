@@ -19,6 +19,7 @@ public class UpLight : MonoBehaviour
     }
     private void Awake()
     {
+        playerCamera = Camera.main;
         ceilingLampDevice = GetComponent<CeilingLampDevice>();
         ignoreLayer = LayerMask.GetMask("IgnoreRaycast");
     }

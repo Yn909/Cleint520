@@ -7,6 +7,7 @@ public class LightToggleSimple : MonoBehaviour
     // 灯所属的父物体
     public GameObject[] lights;
     public LampDevice lampDevice;
+    
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.T))
@@ -16,6 +17,7 @@ public class LightToggleSimple : MonoBehaviour
     }
     private void Awake()
     {
+        playerCamera = Camera.main;
         lampDevice = GetComponent<LampDevice>();
         ignoreLayer = LayerMask.GetMask("IgnoreRaycast");
     }
